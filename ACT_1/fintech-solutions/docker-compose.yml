@@ -1,0 +1,57 @@
+# Versión del formato del archivo Docker Compose
+version: '3.8'
+
+# Sección donde definimos nuestros servicios (contenedores)
+services:
+
+  # Servicio para la base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: fintech-db
+    networks:
+      - fintech-network 
+    environment:
+      MYSQL_ROOT_PASSWORD: my_secret_password
+      MYSQL_DATABASE: fintech
+      MYSQL_USER: fintech_user
+      MYSQL_PASSWORD: fintech_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+
+  # Servicio para el backend Node.js
+  backend:
+    build: ./back
+    container_name: fintech-backend
+    networks:
+      - fintech-network
+    environment:
+      DB_HOST: db`
+      DB_USER: fintech_user
+      DB_PASSWORD: fintech_password
+      DB_NAME: fintech
+    ports: 
+      - "3000:3000" 
+    depends_on:
+      - db
+    
+  # Servicio para el frontend Angular (servido por Nginx)
+  frontend:
+    build: ./front
+    container_name: fintech-frontend
+    networks:
+      - fintech-network
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+# Sección para definir redes personalizadas
+networks:
+  fintech-network:
+    driver: bridge
+
+# Sección para definir volúmenes nombrados
+volumes:
+  db_data:
+    driver: local
