@@ -1,0 +1,21 @@
+# 06-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fintech-ingress
+  annotations: # Estas anotaciones son instrucciones específicas para el controlador de AWS.
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing # Crea un ALB público.
+    alb.ingress.kubernetes.io/target-type: ip # Mejora el rendimiento enrutando a la IP del pod.
+spec:
+  rules: # Reglas de enrutamiento basadas en la ruta de la URL.
+    - http:
+        paths:
+          - path: /api # Tráfico a /api/...
+            pathType: Prefix
+            backend:
+              service: { name: backend-service, port: { number: 80 } } # ...va al backend.
+          - path: / # Cualquier otro tráfico...
+            pathType: Prefix
+            backend:
+              service: { name: frontend-service, port: { number: 80 } } # ...va al frontend.

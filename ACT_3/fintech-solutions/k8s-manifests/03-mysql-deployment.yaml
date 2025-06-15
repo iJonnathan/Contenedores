@@ -1,0 +1,52 @@
+# 03-mysql-deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  clusterIP: None # Esto crea un "Headless Service". No tiene IP propia, sino que resuelve directamente a las IPs de los pods. Esencial para StatefulSets.
+  selector:
+    app: mysql
+---
+apiVersion: apps/v1
+kind: StatefulSet # Usamos StatefulSet porque la base de datos necesita una identidad estable y almacenamiento persistente único.
+metadata:
+  name: mysql
+spec:
+  serviceName: "mysql-service" # Se enlaza con el Headless Service.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template: # Plantilla del Pod
+    metadata:
+      labels: { app: mysql }
+    spec:
+      containers:
+      - image: mysql:8.0
+        name: mysql
+        env: # Inyectamos las variables de entorno desde el Secret que creamos.
+        - { name: MYSQL_DATABASE, value: "fintech" }
+        - { name: MYSQL_USER, valueFrom: { secretKeyRef: { name: mysql-secrets, key: MYSQL_USER } } }
+        - { name: MYSQL_PASSWORD, valueFrom: { secretKeyRef: { name: mysql-secrets, key: MYSQL_PASSWORD } } }
+        - { name: MYSQL_ROOT_PASSWORD, valueFrom: { secretKeyRef: { name: mysql-secrets, key: MYSQL_ROOT_PASSWORD } } }
+        ports:
+        - containerPort: 3306
+        volumeMounts: # "Conectamos" los volúmenes a rutas dentro del contenedor.
+        - name: mysql-persistent-storage # Monta el disco persistente.
+          mountPath: /var/lib/mysql
+        - name: mysql-initdb # Monta el script SQL.
+          mountPath: /docker-entrypoint-initdb.d
+      volumes: # Definimos de dónde vienen los volúmenes (excepto el persistente).
+      - name: mysql-initdb
+        configMap: # Este volumen usa el ConfigMap que creamos.
+          name: mysql-initdb-cm
+  volumeClaimTemplates: # Plantilla para solicitar almacenamiento persistente automáticamente.
+  - metadata:
+      name: mysql-persistent-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ] # El disco solo puede ser escrito por un nodo a la vez.
+      storageClassName: gp2 # El tipo de disco de AWS EBS que usará EKS por defecto.
+      resources:
+        requests:
+          storage: 5Gi # Solicitamos 5 Gigabytes de espacio.

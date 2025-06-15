@@ -1,0 +1,15 @@
+# 02-mysql-configmap.yaml
+apiVersion: v1
+kind: ConfigMap # Recurso para almacenar datos de configuración no sensibles
+metadata:
+  name: mysql-initdb-cm
+data: # Los datos se almacenan como pares clave-valor
+  init.sql: | # La clave es el nombre del archivo que se creará dentro del pod
+    CREATE DATABASE IF NOT EXISTS fintech;
+    USE fintech;
+    CREATE TABLE IF NOT EXISTS accounts (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      balance DECIMAL(10, 2) NOT NULL
+    );
+    INSERT INTO accounts (name, balance) VALUES ('Jonnathan Peñaranda', 1500.50) ON DUPLICATE KEY UPDATE name=name;

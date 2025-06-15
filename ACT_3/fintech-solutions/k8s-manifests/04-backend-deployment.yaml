@@ -1,0 +1,33 @@
+# 04-backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: fintech-backend } }
+  template:
+    metadata:
+      labels: { app: fintech-backend }
+    spec:
+      containers:
+      - name: backend
+        image: ijonnas/fintech-back:latest # Usando tu imagen de Docker Hub
+        ports:
+        - containerPort: 3000
+        env:
+        - { name: DB_HOST, value: "mysql-service" }
+        - { name: DB_USER, valueFrom: { secretKeyRef: { name: mysql-secrets, key: MYSQL_USER } } }
+        - { name: DB_PASSWORD, valueFrom: { secretKeyRef: { name: mysql-secrets, key: MYSQL_PASSWORD } } }
+        - { name: DB_NAME, value: "fintech" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: fintech-backend
+  ports:
+    - { port: 80, targetPort: 3000 }
