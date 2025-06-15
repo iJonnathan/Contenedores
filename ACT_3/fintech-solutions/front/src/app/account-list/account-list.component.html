@@ -1,0 +1,128 @@
+<h2>FinTech Solutions S.A. - Gestión de Cuentas</h2>
+
+<button *ngIf="!showForm" (click)="openAddForm()">Agregar Nueva Cuenta</button>
+
+<div *ngIf="showForm">
+  <h3>{{ isEditing ? 'Editar Cuenta' : 'Agregar Nueva Cuenta' }}</h3>
+  <form (ngSubmit)="saveAccount()">
+    <div>
+      <label for="name">Nombre de Cuenta:</label>
+      <input type="text" id="name" name="name"
+             [(ngModel)]="isEditing ? selectedAccount!.name : newAccount.name" required>
+             </div>
+    <div>
+      <label for="balance">Saldo:</label>
+      <input type="number" id="balance" name="balance"
+             [(ngModel)]="isEditing ? selectedAccount!.balance : newAccount.balance" required step="0.01">
+             </div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelForm()">Cancelar</button>
+  </form>
+  <hr> </div>
+
+
+<div *ngIf="!showForm && accounts.length > 0">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre de Cuenta</th>
+        <th>Saldo</th>
+        <th>Acciones</th> </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let account of accounts">
+        <td>{{ account.id }}</td>
+        <td>{{ account.name }}</td>
+        <td>{{ account.balance | currency:'USD':'symbol':'1.2-2' }}</td>
+        <td>
+          <button (click)="editAccount(account)">Editar</button>
+          <button (click)="deleteAccount(account.id!)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="!showForm && accounts.length === 0">
+  <p>No se encontraron cuentas o hubo un error al cargar los datos.</p>
+</div>
+
+<style>
+  /* ... (estilos de tabla y formulario anteriores) ... */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  tr:hover {
+    background-color: #e9e9e9;
+  }
+  h2 {
+      color: #333;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  form div {
+      margin-bottom: 15px;
+  }
+  form label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+  }
+  form input[type="text"],
+  form input[type="number"] {
+      width: calc(100% - 22px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+  }
+  form button {
+      padding: 10px 15px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+  }
+  form button[type="submit"] {
+      background-color: #5cb85c;
+      color: white;
+  }
+  form button[type="button"] {
+      background-color: #f0ad4e;
+      color: white;
+  }
+   button {
+       padding: 8px 12px;
+       margin-right: 5px;
+       border: none;
+       border-radius: 4px;
+       cursor: pointer;
+   }
+  td button:first-of-type {
+      background-color: #0275d8;
+      color: white;
+  }
+  td button:last-of-type {
+      background-color: #d9534f;
+      color: white;
+  }
+  hr {
+      margin: 20px 0;
+      border: 0;
+      border-top: 1px solid #eee;
+  }
+</style>
