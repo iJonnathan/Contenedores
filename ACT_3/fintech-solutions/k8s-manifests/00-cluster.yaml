@@ -1,15 +1,13 @@
 # 00-cluster.yaml
-apiVersion: eksctl.io/v1alpha5  # Versión de la API de eksctl
-kind: ClusterConfig          # Tipo de recurso: una configuración de clúster
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
 
 metadata:
-  name: fintech-cluster      # Nombre que le daremos a nuestro clúster en AWS
-  region: us-east-1          # Región de AWS donde se creará. ¡Asegúrate que coincida con la de tu EC2!
-  version: "1.28"            # Versión de Kubernetes que queremos usar
+  name: fintech-cluster
+  region: us-east-1 # Asegúrate que coincida con tu región
+  version: "1.28"
 
-nodeGroups: # Define los grupos de servidores (nodos de trabajo)
-  - name: ng-fintech-workers # Nombre del grupo de nodos
-    instanceType: t3.medium  # Tipo de instancia EC2 para los nodos. t3.medium es un buen balance.
-    desiredCapacity: 2       # El clúster se iniciará con 2 nodos.
-    minSize: 2               # Número mínimo de nodos en el grupo.
-    maxSize: 3               # Número máximo. Permite que el clúster escale a 3 nodos si la carga lo requiere.
+nodeGroups:
+  - name: ng-fintech-workers
+    instanceType: t3.medium
+    desiredCapacity: 2
